@@ -27,8 +27,6 @@
             timestamp: Date.now()
         };
         
-        console.log('Background: Artists detected in tab', tabId, ':', artists);
-        
         // Check for duplicates across other tabs
         const duplicates = findDuplicateArtists(artists, tabId);
         
@@ -102,14 +100,12 @@
     // Clean up when tabs are closed
     chrome.tabs.onRemoved.addListener((tabId) => {
         delete tabArtists[tabId];
-        console.log('Background: Cleaned up data for closed tab', tabId);
     });
     
     // Clean up when tabs are updated (navigated away from Gelbooru)
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         if (changeInfo.url && !changeInfo.url.includes('gelbooru.com')) {
             delete tabArtists[tabId];
-            console.log('Background: Cleaned up data for tab navigated away from Gelbooru', tabId);
         }
     });
     

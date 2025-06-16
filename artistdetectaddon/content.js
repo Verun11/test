@@ -9,23 +9,18 @@
     function detectArtistTags() {
         const artistTags = [];
         
-        console.log('Content: Starting artist detection...');
-        
         // Method 1: Direct search for artist: links (most reliable)
         const artistLinks = document.querySelectorAll('a[href*="artist:"]');
-        console.log('Content: Found', artistLinks.length, 'artist: links');
         
         artistLinks.forEach(link => {
             const artistName = link.textContent.trim();
             if (artistName && !artistTags.includes(artistName)) {
                 artistTags.push(artistName);
-                console.log('Found artist via direct artist: link:', artistName);
             }
         });
         
         // Method 2: Look for links with artist tags in their URLs
         const tagLinks = document.querySelectorAll('a[href*="tags="]');
-        console.log('Content: Found', tagLinks.length, 'tag links');
         
         tagLinks.forEach(link => {
             const href = link.getAttribute('href');
@@ -35,7 +30,6 @@
             if (href && href.includes('artist:') && artistName) {
                 if (!artistTags.includes(artistName)) {
                     artistTags.push(artistName);
-                    console.log('Found artist via tag URL:', artistName);
                 }
             }
         });
@@ -50,31 +44,25 @@
             
             // If we find an element that says exactly "Artist"
             if (text && text.trim() === 'Artist') {
-                console.log('Found Artist header element');
                 foundArtistSection = true;
                 
                 // Strategy 1: Look in the immediate parent and siblings
                 let container = element.parentElement;
                 if (container) {
                     const nearbyLinks = container.querySelectorAll('a');
-                    console.log('Found', nearbyLinks.length, 'links in Artist container');
                     
                     nearbyLinks.forEach(link => {
                         const href = link.getAttribute('href');
                         const artistName = link.textContent.trim();
                         
-                        console.log('Checking link:', artistName, 'href:', href);
-                        
                         if (href && artistName && href.includes('tags=') && !artistTags.includes(artistName)) {
                             artistTags.push(artistName);
-                            console.log('Found artist via Artist container:', artistName);
                         }
                     });
                 }
                 
                 // Strategy 2: Look for red colored links in the whole document (common for artist tags)
                 const allPageLinks = document.querySelectorAll('a[href*="tags="]');
-                console.log('Checking', allPageLinks.length, 'page links for red color');
                 
                 allPageLinks.forEach(link => {
                     const computedStyle = window.getComputedStyle(link);
@@ -88,9 +76,7 @@
                                  link.style.color.includes('red');
                     
                     if (isRed && artistName && href && !artistTags.includes(artistName)) {
-                        console.log('Found red link:', artistName, 'color:', computedStyle.color);
                         artistTags.push(artistName);
-                        console.log('Found artist via red color:', artistName);
                     }
                 });
                 
@@ -100,17 +86,10 @@
         
         // Method 4: Fallback - look for any links that might be artists based on URL patterns
         if (artistTags.length === 0) {
-            console.log('No artists found yet, trying fallback detection...');
-            
             const allPageLinks = document.querySelectorAll('a[href*="tags="]');
             allPageLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 const linkText = link.textContent.trim();
-                
-                // Log some examples to help debug
-                if (allPageLinks.length < 10 || Math.random() < 0.1) {
-                    console.log('Sample link:', linkText, 'href:', href);
-                }
                 
                 // Check for various artist tag patterns in URLs
                 if (href && linkText && 
@@ -121,14 +100,10 @@
                     
                     if (!artistTags.includes(linkText)) {
                         artistTags.push(linkText);
-                        console.log('Found artist via fallback pattern:', linkText);
                     }
                 }
             });
         }
-        
-        console.log('Content: Detected artists:', artistTags);
-        console.log('Content: Found artist section:', foundArtistSection);
         
         if (artistTags.length > 0) {
             detectedArtists = artistTags;
@@ -163,15 +138,7 @@
                     (href.includes('artist:') || href.includes('tags='))) {
                     
                     link.classList.add('gelbooru-tracked-artist');
-                    link.style.setProperty('background-color', '#4ecdc4', 'important');
-                    link.style.setProperty('color', 'white', 'important');
-                    link.style.fontWeight = 'bold';
-                    link.style.padding = '2px 6px';
-                    link.style.borderRadius = '3px';
-                    link.style.margin = '2px';
-                    link.style.border = '2px solid #2ca8a2';
                     link.title = `Tracked artist: ${artist}`;
-                    console.log('Highlighted artist link:', artist);
                 }
             });
         });
@@ -259,8 +226,6 @@
     // Initialize the extension
     function initialize() {
         if (isGelbooruPostPage()) {
-            console.log('Content: Initializing cross-tab artist tracker on Gelbooru post page');
-            
             // Run detection after a short delay
             setTimeout(detectArtistTags, 1000);
             

@@ -122,6 +122,13 @@
 
 /* Tracked artist highlighting */
 .gelbooru-tracked-artist {
+    background-color: #4ecdc4 !important;
+    color: white !important;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin: 2px;
+    border: 2px solid #2ca8a2 !important;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
@@ -129,23 +136,6 @@
 .gelbooru-tracked-artist:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Animation for duplicate detection */
-@keyframes duplicateFound {
-    0% {
-        background-color: #4ecdc4;
-    }
-    50% {
-        background-color: #ff6b6b;
-    }
-    100% {
-        background-color: #4ecdc4;
-    }
-}
-
-.gelbooru-tracked-artist.duplicate-detected {
-    animation: duplicateFound 1s ease-in-out 3;
 }
 
 /* Responsive design */
