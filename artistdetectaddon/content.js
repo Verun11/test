@@ -8,101 +8,119 @@
     // Function to detect artist tags on the current page
     function detectArtistTags() {
         const artistTags = [];
-        
-        // Method 1: Direct search for artist: links (most reliable)
-        const artistLinks = document.querySelectorAll('a[href*="artist:"]');
-        
-        artistLinks.forEach(link => {
-            const artistName = link.textContent.trim();
-            if (artistName && !artistTags.includes(artistName)) {
-                artistTags.push(artistName);
-            }
-        });
-        
-        // Method 2: Look for links with artist tags in their URLs
-        const tagLinks = document.querySelectorAll('a[href*="tags="]');
-        
-        tagLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            const artistName = link.textContent.trim();
-            
-            // Check if the URL contains artist: in the tags parameter
-            if (href && href.includes('artist:') && artistName) {
-                if (!artistTags.includes(artistName)) {
-                    artistTags.push(artistName);
-                }
-            }
-        });
-        
-        // Method 3: Look for the "Artist" section header and nearby links
-        const allElements = document.querySelectorAll('*');
-        let foundArtistSection = false;
-        
-        for (let i = 0; i < allElements.length; i++) {
-            const element = allElements[i];
-            const text = element.textContent;
-            
-            // If we find an element that says exactly "Artist"
-            if (text && text.trim() === 'Artist') {
-                foundArtistSection = true;
-                
-                // Strategy 1: Look in the immediate parent and siblings
-                let container = element.parentElement;
-                if (container) {
-                    const nearbyLinks = container.querySelectorAll('a');
-                    
-                    nearbyLinks.forEach(link => {
-                        const href = link.getAttribute('href');
-                        const artistName = link.textContent.trim();
-                        
-                        if (href && artistName && href.includes('tags=') && !artistTags.includes(artistName)) {
-                            artistTags.push(artistName);
-                        }
-                    });
-                }
-                
-                // Strategy 2: Look for red colored links in the whole document (common for artist tags)
-                const allPageLinks = document.querySelectorAll('a[href*="tags="]');
-                
-                allPageLinks.forEach(link => {
-                    const computedStyle = window.getComputedStyle(link);
-                    const artistName = link.textContent.trim();
-                    const href = link.getAttribute('href');
-                    
-                    // Check if the link is red (artist tags are often red on Gelbooru)
-                    const isRed = computedStyle.color === 'rgb(255, 0, 0)' || 
-                                 computedStyle.color === 'red' ||
-                                 computedStyle.color.includes('255, 0, 0') ||
-                                 link.style.color.includes('red');
-                    
-                    if (isRed && artistName && href && !artistTags.includes(artistName)) {
+        const hostname = window.location.hostname;
+
+        if (hostname.includes('danbooru.donmai.us')) {
+            // Danbooru-specific detection
+            const danbooruArtistElements = document.querySelectorAll('li.tag-type-1'); // Target 'artist' tag type
+            danbooruArtistElements.forEach(element => {
+                const linkElement = element.querySelector('a.search-tag[href*="tags="]');
+                if (linkElement) {
+                    const artistName = linkElement.textContent.trim();
+                    if (artistName && !artistTags.includes(artistName)) {
                         artistTags.push(artistName);
-                    }
-                });
-                
-                break;
-            }
-        }
-        
-        // Method 4: Fallback - look for any links that might be artists based on URL patterns
-        if (artistTags.length === 0) {
-            const allPageLinks = document.querySelectorAll('a[href*="tags="]');
-            allPageLinks.forEach(link => {
-                const href = link.getAttribute('href');
-                const linkText = link.textContent.trim();
-                
-                // Check for various artist tag patterns in URLs
-                if (href && linkText && 
-                    (href.includes('artist%3A') || // URL encoded artist:
-                     href.includes('artist+') ||   // Plus encoded
-                     href.includes('artist:') ||   // Direct
-                     href.match(/tags=.*artist/i))) { // Any artist pattern
-                    
-                    if (!artistTags.includes(linkText)) {
-                        artistTags.push(linkText);
                     }
                 }
             });
+        } else if (hostname.includes('gelbooru.com')) {
+            // Gelbooru-specific detection (existing logic)
+            // Method 1: Direct search for artist: links (most reliable)
+            const artistLinks = document.querySelectorAll('a[href*="artist:"]');
+            
+            artistLinks.forEach(link => {
+                const artistName = link.textContent.trim();
+                if (artistName && !artistTags.includes(artistName)) {
+                    artistTags.push(artistName);
+                }
+            });
+            
+            // Method 2: Look for links with artist tags in their URLs
+            const tagLinks = document.querySelectorAll('a[href*="tags="]');
+
+            tagLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                const artistName = link.textContent.trim();
+
+                // Check if the URL contains artist: in the tags parameter
+                if (href && href.includes('artist:') && artistName) {
+                    if (!artistTags.includes(artistName)) {
+                        artistTags.push(artistName);
+                    }
+                }
+            });
+
+            // Method 3: Look for the "Artist" section header and nearby links
+            const allElements = document.querySelectorAll('*');
+            // let foundArtistSection = false; // This variable is not used in the current Gelbooru logic path that adds to artistTags
+
+            for (let i = 0; i < allElements.length; i++) {
+                const element = allElements[i];
+                const text = element.textContent;
+                
+                // If we find an element that says exactly "Artist"
+                if (text && text.trim() === 'Artist') {
+                    // foundArtistSection = true; // Mark as found
+                    
+                    // Strategy 1: Look in the immediate parent and siblings
+                    let container = element.parentElement;
+                    if (container) {
+                        const nearbyLinks = container.querySelectorAll('a');
+
+                        nearbyLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            const artistName = link.textContent.trim();
+
+                            if (href && artistName && href.includes('tags=') && !artistTags.includes(artistName)) {
+                                artistTags.push(artistName);
+                            }
+                        });
+                    }
+
+                    // Strategy 2: Look for red colored links in the whole document (common for artist tags)
+                    const allPageLinks = document.querySelectorAll('a[href*="tags="]');
+
+                    allPageLinks.forEach(link => {
+                        const computedStyle = window.getComputedStyle(link);
+                        const artistName = link.textContent.trim();
+                        const href = link.getAttribute('href');
+
+                        // Check if the link is red (artist tags are often red on Gelbooru)
+                        const isRed = computedStyle.color === 'rgb(255, 0, 0)' ||
+                                     computedStyle.color === 'red' ||
+                                     computedStyle.color.includes('255, 0, 0') ||
+                                     link.style.color.includes('red');
+                        
+                        if (isRed && artistName && href && !artistTags.includes(artistName)) {
+                            artistTags.push(artistName);
+                        }
+                    });
+
+                    break;
+                }
+            }
+
+            // Method 4: Fallback - look for any links that might be artists based on URL patterns
+            // This should run if other methods found nothing OR to augment findings.
+            // For simplicity, let's assume it runs if artistTags is still empty.
+            if (artistTags.length === 0) {
+                const allPageLinks = document.querySelectorAll('a[href*="tags="]');
+                allPageLinks.forEach(link => {
+                    const href = link.getAttribute('href');
+                    const linkText = link.textContent.trim();
+                    
+                    // Check for various artist tag patterns in URLs
+                    if (href && linkText &&
+                        (href.includes('artist%3A') || // URL encoded artist:
+                         href.includes('artist+') ||   // Plus encoded
+                         href.includes('artist:') ||   // Direct
+                         href.match(/tags=.*artist/i))) { // Any artist pattern
+
+                        if (!artistTags.includes(linkText)) {
+                            artistTags.push(linkText);
+                        }
+                    }
+                });
+            }
         }
         
         if (artistTags.length > 0) {
@@ -234,31 +252,45 @@
         }
     });
     
-    // Check if we're on a Gelbooru post page
-    function isGelbooruPostPage() {
-        return window.location.hostname.includes('gelbooru.com') && 
-               (window.location.pathname.includes('post') || 
-                window.location.search.includes('page=post') ||
-                window.location.search.includes('id='));
+    // Check if we're on a supported post page
+    function isSupportedPostPage() {
+        const hostname = window.location.hostname;
+        if (hostname.includes('gelbooru.com')) {
+            return (window.location.pathname.includes('post') ||
+                    window.location.search.includes('page=post') ||
+                    window.location.search.includes('id='));
+        } else if (hostname.includes('danbooru.donmai.us')) {
+            // Danbooru post URLs are typically /posts/<post_id> or /posts?tags=...
+            // For simplicity, activate on any page that might show posts or tags.
+            // More specific checks can be added if needed, e.g., for /posts/*
+            return window.location.pathname.includes('posts');
+        }
+        return false;
     }
     
     // Initialize the extension
     function initialize() {
-        if (isGelbooruPostPage()) {
+        if (isSupportedPostPage()) {
             // Run detection after a short delay
             setTimeout(detectArtistTags, 1000);
             
-            // Set up observer for dynamic content changes
+            // Set up observer for dynamic content changes (relevant for both sites)
             const observer = new MutationObserver((mutations) => {
                 let shouldRecheck = false;
                 mutations.forEach((mutation) => {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                        // Check if any added nodes contain artist tag information
                         mutation.addedNodes.forEach(node => {
-                            if (node.nodeType === Node.ELEMENT_NODE && 
-                                (node.querySelector && node.querySelector('a[href*="artist:"]') ||
-                                 node.matches && node.matches('a[href*="artist:"]'))) {
-                                shouldRecheck = true;
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                // Generic check for links that might be artist tags on either site
+                                if (node.querySelector &&
+                                    (node.querySelector('a[href*="artist:"]') || // Gelbooru
+                                     node.querySelector('li.tag-type-1 a'))) {  // Danbooru
+                                    shouldRecheck = true;
+                                } else if (node.matches &&
+                                           (node.matches('a[href*="artist:"]') ||
+                                            node.matches('li.tag-type-1 a'))) {
+                                    shouldRecheck = true;
+                                }
                             }
                         });
                     }

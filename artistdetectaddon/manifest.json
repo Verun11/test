@@ -9,7 +9,8 @@
     "tabs",
     "storage",
     "*://gelbooru.com/*",
-    "*://*.gelbooru.com/*"
+    "*://*.gelbooru.com/*",
+    "*://danbooru.donmai.us/*"
   ],
   
   "background": {
@@ -19,7 +20,7 @@
   
   "content_scripts": [
     {
-      "matches": ["*://gelbooru.com/*", "*://*.gelbooru.com/*"],
+      "matches": ["*://gelbooru.com/*", "*://*.gelbooru.com/*", "*://danbooru.donmai.us/*"],
       "js": ["content.js"],
       "css": ["styles.css"],
       "run_at": "document_end",
