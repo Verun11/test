@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+  "name": "Gelbooru Cross-Tab Artist Tracker",
+  "version": "1.0",
+  "description": "Tracks and detects when the same artist appears across multiple Gelbooru tabs",
+  
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "*://gelbooru.com/*",
+    "*://*.gelbooru.com/*"
+  ],
+  
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["*://gelbooru.com/*", "*://*.gelbooru.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  
+  "web_accessible_resources": [
+    "styles.css"
+  ],
+  
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
