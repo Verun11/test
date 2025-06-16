@@ -138,6 +138,33 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
+.close-duplicates-btn {
+    background-color: #e74c3c; /* A shade of red */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px; /* Space above the button */
+    display: block; /* Make it take its own line, or inline-block if preferred */
+    width: 100%; /* Make it full width within its container */
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.close-duplicates-btn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
+
+.close-duplicates-btn:disabled {
+    background-color: #f5b7b1; /* Lighter, washed-out red */
+    color: #fdecea;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .gelbooru-duplicate-notification {

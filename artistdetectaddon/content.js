@@ -177,6 +177,7 @@
                         `).join('')}
                         <li><strong>Current tab</strong></li>
                     </ul>
+                    <button class="close-duplicates-btn" data-artist="${duplicate.artist}">Close Other Tabs</button>
                 </div>
             `;
         });
@@ -194,6 +195,24 @@
         // Insert at the top of the page
         document.body.insertBefore(notification, document.body.firstChild);
         
+        // Add event listeners to the new buttons
+        const closeButtons = notification.querySelectorAll('.close-duplicates-btn');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                const artistToClose = this.dataset.artist;
+                if (artistToClose) {
+                    chrome.runtime.sendMessage({
+                        type: 'CLOSE_DUPLICATE_TABS',
+                        artist: artistToClose
+                    });
+                    // Optional: Visual feedback
+                    this.textContent = 'Closing...';
+                    this.disabled = true;
+                }
+            });
+        });
+
         // Auto-hide after 15 seconds
         setTimeout(() => {
             if (notification.parentNode) {

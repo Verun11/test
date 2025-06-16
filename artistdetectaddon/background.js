@@ -11,6 +11,25 @@
             handleArtistsDetected(message, sender.tab);
         } else if (message.type === 'GET_CROSS_TAB_INFO') {
             sendResponse(getCrossTabInfo(message.artists, sender.tab.id));
+        } else if (message.type === 'CLOSE_DUPLICATE_TABS') {
+            const artistToClose = message.artist;
+            const tabToKeepOpenId = sender.tab.id;
+
+            if (artistToClose && tabToKeepOpenId) {
+                for (const [tabIdStr, tabData] of Object.entries(tabArtists)) {
+                    const tabId = parseInt(tabIdStr);
+                    if (tabId !== tabToKeepOpenId) {
+                        if (tabData.artists && tabData.artists.includes(artistToClose)) {
+                            chrome.tabs.remove(tabId, () => {
+                                if (chrome.runtime.lastError) {
+                                    // Error handling for tab closing, e.g. tab was already closed.
+                                    // Silently ignore for now, or add more robust error reporting if needed.
+                                }
+                            });
+                        }
+                    }
+                }
+            }
         }
     });
     
