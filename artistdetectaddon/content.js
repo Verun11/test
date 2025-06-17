@@ -86,48 +86,19 @@
                 }
             });
 
-            // Method 3: Look for the "Artist" section header and parse text content
-            const allElements = document.querySelectorAll('*'); // Consider more targeted selectors if performance is an issue
-            for (let i = 0; i < allElements.length; i++) {
-                const currentElement = allElements[i];
-                if (currentElement.textContent && currentElement.textContent.trim() === 'Artist') {
-                    let artistTextContainer = null;
-                    // Try to find the element containing the actual artist name(s)
-                    if (currentElement.nextElementSibling) {
-                        artistTextContainer = currentElement.nextElementSibling;
-                    } else if (currentElement.parentElement && currentElement.parentElement.nextElementSibling) {
-                        artistTextContainer = currentElement.parentElement.nextElementSibling;
-                    } else {
-                        // Fallback: assume artist names might be within the same parent but not immediate siblings
-                        // This could be the case if "Artist" is a <span> and names are in other <span>s in the same parent
-                        artistTextContainer = currentElement.parentElement;
+            // Method 5: Site-Specific Class-Based Detection (li.tag-type-artist)
+            const artistTagElements = document.querySelectorAll('li.tag-type-artist');
+            artistTagElements.forEach(liElement => {
+                const linkElement = liElement.querySelector('a[href*="tags="]');
+                if (linkElement) {
+                    let potentialArtistName = extractArtistName(linkElement.textContent.trim());
+                    if (potentialArtistName && potentialArtistName.length > 1 && !artistTags.includes(potentialArtistName)) {
+                        artistTags.push(potentialArtistName);
                     }
-
-                    if (artistTextContainer) {
-                        let text = artistTextContainer.textContent;
-                        const lines = text.split('\n'); // Split by newline, common for multiple artists
-
-                        lines.forEach(line => {
-                            let rawName = line.trim();
-                            if (rawName) {
-                                // Remove leading symbols like '?', '*', '~', '-' and whitespace
-                                rawName = rawName.replace(/^[?*~\s-]+/, '').trim();
-                                // Remove trailing numbers (post count) and optional parenthesized count like " (123)"
-                                // e.g., "artist_name 123", "artist_name 123 (456)"
-                                rawName = rawName.replace(/\s+\d+(\s*\(\s*\d+\s*\))?$/, '').trim();
-
-                                const artistName = extractArtistName(rawName); // Use existing helper
-                                // Basic sanity check for length > 1, as some short strings might be noise
-                                if (artistName && artistName.length > 1 && !artistTags.includes(artistName)) {
-                                    artistTags.push(artistName);
-                                }
-                            }
-                        });
-                    }
-                    // The previous link-based search within this "Artist" section is now replaced by text parsing.
-                    break; // Process only the first "Artist" section found this way.
                 }
-            }
+            });
+
+            // Method 3 has been removed.
 
             // Method 4: Fallback - parse href for artist patterns (artist%3A, artist+, artist:) in tags=
             // This runs regardless of previous findings to catch any missed artists.
