@@ -86,56 +86,46 @@
                 }
             });
 
-            // Method 3: Look for the "Artist" section header and nearby links
-            const allElements = document.querySelectorAll('*');
+            // Method 3: Look for the "Artist" section header and parse text content
+            const allElements = document.querySelectorAll('*'); // Consider more targeted selectors if performance is an issue
             for (let i = 0; i < allElements.length; i++) {
-                const element = allElements[i];
-                if (element.textContent && element.textContent.trim() === 'Artist') {
-                    let container = element.parentElement;
-                    if (container) {
-                        const nearbyLinks = container.querySelectorAll('a');
-                        nearbyLinks.forEach(link => {
-                            const href = link.getAttribute('href');
-                            let artistName = null;
+                const currentElement = allElements[i];
+                if (currentElement.textContent && currentElement.textContent.trim() === 'Artist') {
+                    let artistTextContainer = null;
+                    // Try to find the element containing the actual artist name(s)
+                    if (currentElement.nextElementSibling) {
+                        artistTextContainer = currentElement.nextElementSibling;
+                    } else if (currentElement.parentElement && currentElement.parentElement.nextElementSibling) {
+                        artistTextContainer = currentElement.parentElement.nextElementSibling;
+                    } else {
+                        // Fallback: assume artist names might be within the same parent but not immediate siblings
+                        // This could be the case if "Artist" is a <span> and names are in other <span>s in the same parent
+                        artistTextContainer = currentElement.parentElement;
+                    }
 
-                            if (href) {
-                                // Strategy 3.1: Check href for direct artist:actual_artist_name
-                                if (href.includes('artist:')) {
-                                    const hrefParts = href.split('artist:');
-                                    if (hrefParts.length > 1) {
-                                        artistName = extractArtistName(hrefParts[1].split('&')[0]);
-                                    }
-                                }
-                                // Strategy 3.2: Parse href for tags=artist:actual_artist_name
-                                if (!artistName && href.includes('tags=')) {
-                                    const params = new URLSearchParams(href.substring(href.indexOf('?') + 1));
-                                    const tags = params.get('tags');
-                                    if (tags) {
-                                        const tagParts = tags.split(/\s+/);
-                                        for (const tag of tagParts) {
-                                            if (tag.toLowerCase().startsWith('artist')) {
-                                                const extracted = extractArtistName(tag);
-                                                if (extracted) {
-                                                    artistName = extracted;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            // Fallback to textContent if no artist found in href
-                            if (!artistName) {
-                                artistName = extractArtistName(link.textContent.trim());
-                            }
+                    if (artistTextContainer) {
+                        let text = artistTextContainer.textContent;
+                        const lines = text.split('\n'); // Split by newline, common for multiple artists
 
-                            if (artistName && !artistTags.includes(artistName)) {
-                                artistTags.push(artistName);
+                        lines.forEach(line => {
+                            let rawName = line.trim();
+                            if (rawName) {
+                                // Remove leading symbols like '?', '*', '~', '-' and whitespace
+                                rawName = rawName.replace(/^[?*~\s-]+/, '').trim();
+                                // Remove trailing numbers (post count) and optional parenthesized count like " (123)"
+                                // e.g., "artist_name 123", "artist_name 123 (456)"
+                                rawName = rawName.replace(/\s+\d+(\s*\(\s*\d+\s*\))?$/, '').trim();
+
+                                const artistName = extractArtistName(rawName); // Use existing helper
+                                // Basic sanity check for length > 1, as some short strings might be noise
+                                if (artistName && artistName.length > 1 && !artistTags.includes(artistName)) {
+                                    artistTags.push(artistName);
+                                }
                             }
                         });
                     }
-                    // Strategy 2 (Red Colored Links) is removed.
-                    break; // Found "Artist" section, assume relevant links are processed.
+                    // The previous link-based search within this "Artist" section is now replaced by text parsing.
+                    break; // Process only the first "Artist" section found this way.
                 }
             }
 
@@ -180,7 +170,7 @@
             // Highlight artist tags
             highlightArtistTags(uniqueArtistTags);
         }
-        
+
         return uniqueArtistTags;
     }
 
