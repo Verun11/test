@@ -129,7 +129,7 @@
 
         if (uniqueArtistTags.length > 0) {
             detectedArtists = uniqueArtistTags;
-
+            
             // Send artists to background script
             chrome.runtime.sendMessage({
                 type: 'ARTISTS_DETECTED',
@@ -137,51 +137,12 @@
                 url: window.location.href,
                 title: document.title
             });
-
+            
             // Highlight artist tags
             highlightArtistTags(uniqueArtistTags);
         }
-
-        return uniqueArtistTags;
-    }
-
-    // Highlight artist tags on the page
-    function highlightArtistTags(artists) {
-        artists.forEach(artist => {
-            // Find all links that contain this exact artist name
-            const allLinks = document.querySelectorAll('a');
-
-            allLinks.forEach(link => {
-                const linkText = extractArtistName(link.textContent.trim()); // Use helper for consistency
-                const href = link.getAttribute('href');
-
-                // Highlight if the cleaned text matches the artist name and it's a tag link
-                if (linkText === artist && href &&
-                    (href.includes('artist:') || href.includes('tags='))) {
-
-                    link.classList.add('gelbooru-tracked-artist');
-                    link.title = `Tracked artist: ${artist}`;
-                }
-            });
-        });
-    }
-
-    // Show notification when duplicate artists are found
-            detectedArtists = artistTags;
-            
-            // Send artists to background script
-            chrome.runtime.sendMessage({
-                type: 'ARTISTS_DETECTED',
-                artists: artistTags,
-                url: window.location.href,
-                title: document.title
-            });
-            
-            // Highlight artist tags
-            highlightArtistTags(artistTags);
-        }
         
-        return artistTags;
+        return uniqueArtistTags;
     }
     
     // Highlight artist tags on the page
@@ -191,10 +152,10 @@
             const allLinks = document.querySelectorAll('a');
             
             allLinks.forEach(link => {
-                const linkText = link.textContent.trim();
+                const linkText = extractArtistName(link.textContent.trim()); // Use helper for consistency
                 const href = link.getAttribute('href');
                 
-                // Highlight if the text matches the artist name and it's a tag link
+                // Highlight if the cleaned text matches the artist name and it's a tag link
                 if (linkText === artist && href && 
                     (href.includes('artist:') || href.includes('tags='))) {
                     
